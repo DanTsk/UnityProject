@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Camera : MonoBehaviour {
+public class CameraController : MonoBehaviour {
 
     public Rabbit rabit;
-
-
-	// Use this for initialization
-	void Start () {
+  
+    // Use this for initialization
+    void Start () {
      	
 	}
 	
