@@ -6,12 +6,14 @@ using UnityEngine;
 public class Rabbit : MonoBehaviour {
     public float speed = 1.5f;
 
+    Animator animator;
     Rigidbody2D rabbitBody;
     SpriteRenderer rabbitSprite;
-    Animator animator;
-
+    Transform heroParent = null;
+ 
     bool isGrounded = false;
     bool JumpActive = false;
+    bool isRunning = false;
 
     float JumpTime = 0f;
 
@@ -20,19 +22,45 @@ public class Rabbit : MonoBehaviour {
 
     public float MaxRunSped = 3f;
     public float RunSpeed = 2f;
-    
 
+    public float GodSeconds = 4f;
 
+    bool affectedByMushroom;
+    bool dead;
+    bool rabbitIsGod;
 
     void Start () {
         rabbitBody = this.GetComponent<Rigidbody2D>();
         rabbitSprite = this.GetComponent<SpriteRenderer>();
         animator = this.GetComponent<Animator>();
+        heroParent = this.transform.parent;
+
+        affectedByMushroom = false;
+        rabbitIsGod = false;
+        dead = false;
 
         LevelController.current.setStartPosition(transform.position);
     }   
 	
 	void Update () {
+        if (!dead)
+        {
+          aliveUpdate();
+        }                  
+    }
+
+    void FixedUpdate()
+    {   
+        if(!dead)
+        {
+          controllRun();
+          controllHits();
+        }           
+         
+    }
+
+
+    void aliveUpdate() {
         if (this.isGrounded)
         {
             animator.SetBool("jump", false);
@@ -41,13 +69,30 @@ public class Rabbit : MonoBehaviour {
         {
             animator.SetBool("jump", true);
         }
+
+        if (this.isRunning)
+        {
+            animator.SetBool("run", true);
+        }
+        else
+        {
+            animator.SetBool("run", false);
+        }
+
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            this.JumpActive = true;
+        }
     }
 
-    void FixedUpdate()
-    {              
-        controllRun();
-        controllJump();
+
+    void die() {
+        dead = true;
+        animator.SetBool("die",true);
+        StartCoroutine(afterDead(1.3f));
     }
+
 
 
     void controllRun() {
@@ -65,14 +110,12 @@ public class Rabbit : MonoBehaviour {
             Vector2 velocity = rabbitBody.velocity;
             velocity.x = value * speed;
             rabbitBody.velocity = velocity;
-
-            animator.SetBool("run", true);
+            isRunning = true;
         }
         else{
             inMove = false;
             speed = 2f;
-
-            animator.SetBool("run", false);
+            isRunning = false;            
         }
         
 
@@ -88,32 +131,32 @@ public class Rabbit : MonoBehaviour {
 
     }
 
-    void controllJump() {
+    void controllHits() {
 
         Vector3 from = transform.position + Vector3.up * 0.3f;
         Vector3 to = transform.position + Vector3.down * 0.2f;
-        int layer_id = 1 << LayerMask.NameToLayer("Ground");
-     
+        int layer_id1 = 1 << LayerMask.NameToLayer("Ground");
+        int layer_id2 = 1 << LayerMask.NameToLayer("MovingBox");
+
+        jumpController(from,to,layer_id1);
+        platfromController(from,to,layer_id2);
+
+    }
+
+
+
+    void jumpController(Vector3 from, Vector3 to, int layer_id) {
         RaycastHit2D hit = Physics2D.Linecast(from, to, layer_id);
+
         if (hit)
         {
-            isGrounded = true;         
+            isGrounded = true;
         }
         else
         {
             isGrounded = false;
         }
-       
-        Debug.DrawLine(from, to, Color.red);
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
-        {
-            this.JumpActive = true;
-            Debug.Log("Jump pressed, is grounded = " + isGrounded);
-        }
-        else if(Input.GetButtonDown("Jump")){
-            Debug.Log("Jump pressed, is grounded = " + isGrounded);
-        }
 
         if (this.JumpActive)
         {
@@ -124,9 +167,9 @@ public class Rabbit : MonoBehaviour {
                 {
                     Vector2 vel = rabbitBody.velocity;
                     vel.y = JumpSpeed * (1.0f - JumpTime / MaxJumpTime);
-                    rabbitBody.velocity = vel;                   
+                    rabbitBody.velocity = vel;
                 }
-             }
+            }
             else
             {
                 this.JumpActive = false;
@@ -134,7 +177,82 @@ public class Rabbit : MonoBehaviour {
             }
 
         }
+    }
 
+    void platfromController(Vector3 from, Vector3 to, int layer_id) {
+        RaycastHit2D hit = Physics2D.Linecast(from, to, layer_id);
+
+        if (hit)
+        {
+            
+            if (hit.transform != null
+            && hit.transform.GetComponent<MovingPlatform>() != null)
+            {               
+                LevelController.SetNewParent(this.transform, hit.transform);
+                isGrounded = true;
+            }
+        }
+        else
+        {
+            LevelController.SetNewParent(this.transform, this.heroParent);
+        }
+    }
+
+
+
+    public void collectMushroom() {
+
+        if (!affectedByMushroom)
+        {
+            affectedByMushroom = true;
+            this.transform.localScale += new Vector3(0.6f,0.6f);       
+        }
 
     }
+
+    public void collectBomb() {
+        if (affectedByMushroom)
+        {
+            affectedByMushroom = false;
+            this.transform.localScale -= new Vector3(0.6f, 0.6f);
+            becomeGod();           
+        }
+        else if(!rabbitIsGod)
+        {
+            die();
+        }
+            
+    }
+
+
+    public void removeBuffes() {
+        if (affectedByMushroom)
+        {
+          affectedByMushroom = false;
+          this.transform.localScale -= new Vector3(0.6f, 0.6f);
+        }
+    }
+
+
+    void becomeGod() {
+        rabbitIsGod = true;
+        rabbitSprite.color = new Color(1f, 0.8f, 0.8f, 1f);
+        StartCoroutine(goneGod(GodSeconds));
+    }
+
+    IEnumerator goneGod(float duration) {
+        yield return new WaitForSeconds(duration);
+        rabbitIsGod = false;
+        rabbitSprite.color = new Color(255f, 255f, 255f, 1f);
+
+    }
+
+    IEnumerator afterDead(float duration)
+    {       
+        yield return new WaitForSeconds(duration);
+        LevelController.current.onRabitDeath(this);      
+        dead = false;
+        animator.SetBool("die", false);
+    }
+
 }
