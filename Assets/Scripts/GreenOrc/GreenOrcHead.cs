@@ -18,7 +18,7 @@ public class GreenOrcHead : MonoBehaviour {
        Vector3 r_pos = rabit.transform.localPosition;
        Vector3 this_pos = transform.parent.localPosition; 
 
-       if (rabit != null && this_pos.y < r_pos.y)
+       if (rabit != null && this_pos.y < r_pos.y && !rabit.isDead())
        {
            orc.die();
        }      
