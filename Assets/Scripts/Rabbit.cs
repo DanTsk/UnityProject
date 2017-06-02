@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Rabbit : MonoBehaviour {
+    public static Rabbit Hero;
     public float speed = 1.5f;
 
     Animator animator;
     Rigidbody2D rabbitBody;
+    BoxCollider2D boxCollider;
     SpriteRenderer rabbitSprite;
     Transform heroParent = null;
  
@@ -29,10 +31,16 @@ public class Rabbit : MonoBehaviour {
     bool dead;
     bool rabbitIsGod;
 
+    private void Awake()
+    {
+        Hero = this;
+    }
+
     void Start () {
         rabbitBody = this.GetComponent<Rigidbody2D>();
         rabbitSprite = this.GetComponent<SpriteRenderer>();
         animator = this.GetComponent<Animator>();
+        boxCollider = this.GetComponent<BoxCollider2D>();
         heroParent = this.transform.parent;
 
         affectedByMushroom = false;
@@ -42,6 +50,7 @@ public class Rabbit : MonoBehaviour {
         LevelController.current.setStartPosition(transform.position);
     }   
 	
+
 	void Update () {
         if (!dead)
         {
@@ -87,12 +96,7 @@ public class Rabbit : MonoBehaviour {
     }
 
 
-    void die() {
-        dead = true;
-        animator.SetBool("die",true);
-        StartCoroutine(afterDead(1.3f));
-    }
-
+    
 
 
     void controllRun() {
@@ -223,14 +227,41 @@ public class Rabbit : MonoBehaviour {
         }
             
     }
-
-
+    
     public void removeBuffes() {
         if (affectedByMushroom)
         {
           affectedByMushroom = false;
           this.transform.localScale -= new Vector3(0.6f, 0.6f);
         }
+    }
+
+    public void die()
+    {
+        dead = true;
+        animator.SetBool("die", true);        
+        StartCoroutine(afterDead(1.3f));
+    }
+
+    public void hitted() {
+
+        if (rabbitIsGod)
+            return;
+
+        if (affectedByMushroom)
+        {
+            removeBuffes();
+            return;
+        }
+            
+
+        dead = true;
+        animator.SetBool("die", true);
+        StartCoroutine(afterDead(1.3f));
+    }
+
+    public bool isDead() {
+        return dead;
     }
 
 
@@ -251,7 +282,7 @@ public class Rabbit : MonoBehaviour {
     {       
         yield return new WaitForSeconds(duration);
         LevelController.current.onRabitDeath(this);      
-        dead = false;
+        dead = false;     
         animator.SetBool("die", false);
     }
 

@@ -8,11 +8,13 @@ public class LevelController : MonoBehaviour
 
 
     public static LevelController current;
+    public static GameObject objects;
 
     Vector3 startingPosition;
 
     void Awake()
     {
+        objects = GameObject.Find("Objects");
         current = this;
         coins = 0;
     }
