@@ -5,7 +5,8 @@ using UnityEngine;
 public class Fruit : Collectable
 {
     protected override void OnRabitHit(Rabbit rabit)
-    {        
+    {
+        LevelController.current.addFruit();
         this.CollectedHide();
     }
 }

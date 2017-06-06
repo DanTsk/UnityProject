@@ -2,10 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rabbit : MonoBehaviour {
     public static Rabbit Hero;
     public float speed = 1.5f;
+    public string currentScene;
 
     Animator animator;
     Rigidbody2D rabbitBody;
@@ -42,6 +44,7 @@ public class Rabbit : MonoBehaviour {
         animator = this.GetComponent<Animator>();
         boxCollider = this.GetComponent<BoxCollider2D>();
         heroParent = this.transform.parent;
+        currentScene = SceneManager.GetActiveScene().name;
 
         affectedByMushroom = false;
         rabbitIsGod = false;
@@ -52,7 +55,7 @@ public class Rabbit : MonoBehaviour {
 	
 
 	void Update () {
-        if (!dead)
+        if (!dead && currentScene != "MainMenu" )
         {
           aliveUpdate();
         }                  
@@ -60,7 +63,7 @@ public class Rabbit : MonoBehaviour {
 
     void FixedUpdate()
     {   
-        if(!dead)
+        if(!dead && currentScene != "MainMenu")
         {
           controllRun();
           controllHits();
@@ -238,9 +241,12 @@ public class Rabbit : MonoBehaviour {
 
     public void die()
     {
-        dead = true;
-        animator.SetBool("die", true);        
-        StartCoroutine(afterDead(1.3f));
+        if (!isDead())
+        {
+            dead = true;
+            animator.SetBool("die", true);
+            StartCoroutine(afterDead(1.3f));
+        }
     }
 
     public void hitted() {

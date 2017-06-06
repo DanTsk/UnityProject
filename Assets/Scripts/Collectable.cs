@@ -15,7 +15,8 @@ public class Collectable : MonoBehaviour
             Rabbit rabit = collider.GetComponent<Rabbit>();
             if (rabit != null)
             {
-                this.OnRabitHit(rabit);
+                if(!rabit.isDead())
+                    this.OnRabitHit(rabit);
             }
         }
     }
