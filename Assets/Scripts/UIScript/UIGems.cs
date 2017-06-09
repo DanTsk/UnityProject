@@ -28,9 +28,21 @@ public class UIGems : MonoBehaviour {
     }
 
     public void collectGem(string gems) {
-        if (gems == "gem-1") gemComponents[0].sprite2D = first;
-        else if (gems == "gem-2") gemComponents[1].sprite2D = second;
-        else if (gems == "gem-3") gemComponents[2].sprite2D = third;
+        if (gems == "gem-1")
+        {
+            gemComponents[0].sprite2D = first;
+            LevelController.current.gems[0] = 1;
+        }
+        else if (gems == "gem-2")
+        {
+            gemComponents[1].sprite2D = second;
+            LevelController.current.gems[1] = 1;
+        } 
+        else if (gems == "gem-3")
+        {
+            gemComponents[2].sprite2D = third;
+            LevelController.current.gems[2] = 1;
+        }
     }
 
 }

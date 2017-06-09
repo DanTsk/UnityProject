@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIFruit : MonoBehaviour {
+public class UIFruit : MonoBehaviour
+{
 
     public static UIFruit fruitCounter;
 
@@ -12,11 +13,11 @@ public class UIFruit : MonoBehaviour {
     private void Awake()
     {
         fruitCounter = this;
-        this.label = this.transform.GetComponent<UILabel>();       
+        this.label = this.transform.GetComponent<UILabel>();
     }
 
 
-    public void setFruits(int fruits,int max)
+    public void setFruits(int fruits, int max)
     {
         this.label.text = fruits + "/" + max;
     }

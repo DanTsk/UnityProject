@@ -26,6 +26,10 @@ public class RedOrc : MonoBehaviour
     Rigidbody2D rigidBody;
     Mode currentMode;
 
+
+    public AudioClip attSound = null;
+    AudioSource attSource = null;
+
     public enum Mode
     {
         GoToA,
@@ -48,6 +52,10 @@ public class RedOrc : MonoBehaviour
         currentMode = Mode.GoToB;
         dead = false;
         isWalking = false;
+
+
+        attSource = gameObject.AddComponent<AudioSource>();
+        attSource.clip = attSound;
     }
 
 
@@ -293,7 +301,10 @@ public class RedOrc : MonoBehaviour
         }
 
         launchCarrot(direction);     
-        this.animator.SetTrigger("attack");   
+        this.animator.SetTrigger("attack");
+
+        if(SoundManager.Instance.isSoundOn())
+            attSource.Play();
     }
 
 

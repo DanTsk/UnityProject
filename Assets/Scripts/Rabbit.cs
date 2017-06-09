@@ -9,6 +9,9 @@ public class Rabbit : MonoBehaviour {
     public float speed = 1.5f;
     public string currentScene;
 
+
+
+
     Animator animator;
     Rigidbody2D rabbitBody;
     BoxCollider2D boxCollider;
@@ -33,9 +36,33 @@ public class Rabbit : MonoBehaviour {
     bool dead;
     bool rabbitIsGod;
 
+
+    public AudioClip runSound = null;
+    AudioSource runSource = null;
+
+    public AudioClip dieSound = null;
+    AudioSource dieSource = null;
+
+
+    public AudioClip landSound = null;
+    AudioSource landSource = null;
+
     private void Awake()
     {
         Hero = this;
+    }
+
+
+    void initSounds() {
+        runSource = gameObject.AddComponent<AudioSource>();
+        runSource.clip = runSound;
+
+        dieSource = gameObject.AddComponent<AudioSource>();
+        dieSource.clip = dieSound;
+
+        landSource = gameObject.AddComponent<AudioSource>();
+        landSource.clip = landSound;
+
     }
 
     void Start () {
@@ -49,21 +76,27 @@ public class Rabbit : MonoBehaviour {
         affectedByMushroom = false;
         rabbitIsGod = false;
         dead = false;
+        unactive = false;
 
         LevelController.current.setStartPosition(transform.position);
+
+        initSounds();
     }   
 	
 
 	void Update () {
-        if (!dead && currentScene != "MainMenu" )
+        if (!dead && currentScene != "MainMenu" && !unactive)
         {
           aliveUpdate();
-        }                  
+        }
+
+      
+
     }
 
     void FixedUpdate()
     {   
-        if(!dead && currentScene != "MainMenu")
+        if(!dead && currentScene != "MainMenu" && !unactive)
         {
           controllRun();
           controllHits();
@@ -85,10 +118,17 @@ public class Rabbit : MonoBehaviour {
         if (this.isRunning)
         {
             animator.SetBool("run", true);
+
+
+            if (SoundManager.Instance.isSoundOn() && isGrounded && !runSource.isPlaying)
+            {
+                runSource.Play();
+            }
         }
         else
         {
             animator.SetBool("run", false);
+            runSource.Stop();
         }
 
 
@@ -96,6 +136,13 @@ public class Rabbit : MonoBehaviour {
         {
             this.JumpActive = true;
         }
+
+        if (!isGrounded)
+        {
+            runSource.Stop();
+        }
+
+
     }
 
 
@@ -151,6 +198,7 @@ public class Rabbit : MonoBehaviour {
     }
 
 
+    bool ladning;
 
     void jumpController(Vector3 from, Vector3 to, int layer_id) {
         RaycastHit2D hit = Physics2D.Linecast(from, to, layer_id);
@@ -163,6 +211,16 @@ public class Rabbit : MonoBehaviour {
         {
             isGrounded = false;
         }
+
+        if (hit && ladning)
+        {
+            if (SoundManager.Instance.isSoundOn())
+            {
+                landSource.Play();
+            }
+            ladning = false;
+        }
+
 
 
         if (this.JumpActive)
@@ -181,22 +239,36 @@ public class Rabbit : MonoBehaviour {
             {
                 this.JumpActive = false;
                 this.JumpTime = 0;
+                ladning = true;
             }
 
         }
     }
 
+    
+
     void platfromController(Vector3 from, Vector3 to, int layer_id) {
         RaycastHit2D hit = Physics2D.Linecast(from, to, layer_id);
+
+        if (hit && ladning)
+        {
+            if (SoundManager.Instance.isSoundOn())
+            {
+                landSource.Play();
+            }
+            ladning = false;
+        }
 
         if (hit)
         {
             
             if (hit.transform != null
             && hit.transform.GetComponent<MovingPlatform>() != null)
-            {               
+            {
+             
                 LevelController.SetNewParent(this.transform, hit.transform);
                 isGrounded = true;
+                                
             }
         }
         else
@@ -241,11 +313,18 @@ public class Rabbit : MonoBehaviour {
 
     public void die()
     {
-        if (!isDead())
+
+        if (SoundManager.Instance.isSoundOn())
         {
+            dieSource.Play();
+        }
+     
+
+        if (!isDead())
+        {       
             dead = true;
             animator.SetBool("die", true);
-            StartCoroutine(afterDead(1.3f));
+            StartCoroutine(afterDead(1.3f));            
         }
     }
 
@@ -259,7 +338,12 @@ public class Rabbit : MonoBehaviour {
             removeBuffes();
             return;
         }
-            
+
+
+        if (SoundManager.Instance.isSoundOn())
+        {
+            dieSource.Play();
+        }
 
         dead = true;
         animator.SetBool("die", true);
@@ -270,6 +354,9 @@ public class Rabbit : MonoBehaviour {
         return dead;
     }
 
+    public void setUnactive() {
+        unactive = true;
+    }
 
     void becomeGod() {
         rabbitIsGod = true;
@@ -291,5 +378,7 @@ public class Rabbit : MonoBehaviour {
         dead = false;     
         animator.SetBool("die", false);
     }
+
+    bool unactive;
 
 }

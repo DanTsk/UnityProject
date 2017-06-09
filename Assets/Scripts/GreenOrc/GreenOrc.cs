@@ -25,7 +25,8 @@ public class GreenOrc : MonoBehaviour {
         Idle     
     }
 
-
+    public AudioClip attSound = null;
+    AudioSource attSource = null;
 
     void Start () {
                  
@@ -37,7 +38,10 @@ public class GreenOrc : MonoBehaviour {
         currentMode = Mode.GoToB;
         dead = false;
         isWalking = false;
-	}
+
+        attSource = gameObject.AddComponent<AudioSource>();
+        attSource.clip = attSound;
+    }
 	
 	
 	void Update () {     
@@ -206,6 +210,9 @@ public class GreenOrc : MonoBehaviour {
         currentMode = Mode.Hitting;
         rigidBody.constraints = RigidbodyConstraints2D.FreezePosition;
         this.animator.SetTrigger("attack");
+        if (SoundManager.Instance.isSoundOn())
+            attSource.Play();
+
         StartCoroutine(afterHit(0.65f));
     }
 
