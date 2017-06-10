@@ -327,6 +327,12 @@ public class Rabbit : MonoBehaviour {
             StartCoroutine(afterDead(1.3f));            
         }
     }
+    public void dieSoundPLay() {
+        if (SoundManager.Instance.isSoundOn())
+        {
+            dieSource.Play();
+        }
+    }
 
     public void hitted() {
 

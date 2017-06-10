@@ -11,6 +11,7 @@ public class DeathZone : MonoBehaviour {
   
         if (rabit != null)
         {
+            rabit.dieSoundPLay();
             LevelController.current.onRabitDeath(rabit);
         }
 

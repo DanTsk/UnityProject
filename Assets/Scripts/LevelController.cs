@@ -41,7 +41,7 @@ public class LevelController : MonoBehaviour
 
     void Awake()
     {
-           
+        
         current = this;
 
         objects = GameObject.Find("Objects");
@@ -121,8 +121,7 @@ public class LevelController : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "Level1" || SceneManager.GetActiveScene().name == "Level2")
         {
             lifes--;
-            death++;
-
+            death++;            
             if (lifes < 0)
             {
                 GameObject.Find("LostPopup").GetComponent<UIGamePopup>().showSettings(2);
