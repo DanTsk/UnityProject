@@ -28,6 +28,15 @@ public class UILifes : MonoBehaviour {
         lifeComponents[place].sprite2D = used;
     }
 
+    public void redraw(int lives) {
+
+        for(int i =0; i < lives; i++)
+           lifeComponents[i].sprite2D = unused;
+
+        return;
+    }
+ 
+
     private void loadComponents() {      
         for (int i = 0; i < transform.childCount; ++i)
             lifeComponents[i] =  transform.GetChild(i).GetComponent<UI2DSprite>();

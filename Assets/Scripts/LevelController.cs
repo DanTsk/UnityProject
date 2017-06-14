@@ -109,6 +109,14 @@ public class LevelController : MonoBehaviour
     }
 
 
+    public void collectLife() {
+        if (lifes < 3)
+        {
+            lifes++;
+            death--;
+            UILifes.lifes.redraw(lifes);
+        }
+    }
 
     public void setStartPosition(Vector3 pos)
     {
